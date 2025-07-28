@@ -43,15 +43,16 @@ const formSchema = z.object({
   telefono2: z.string().optional(),
   personasExtras: z.string().optional(),
   nivelVacante: z.string(),
-  carrerasBuscadas: z.array(z.string()).min(1, 'Selecciona al menos una carrera'),
+  carreraBuscada: z.array(z.string()).min(1, 'Selecciona al menos una carrera'),
   requiereStand: z.boolean().optional(),
-  stand: z.string().optional(),
   participaBolsa: z.boolean().optional(),
   traeArticulos: z.boolean().optional(),
   articulo: z.string().optional(),
   logo: z.string().optional(),
   descripcion: z.string().optional(),
-  autorizacion: z.string(),
+  autorizacion: z.enum(['SI', 'NO'], {
+    errorMap: () => ({ message: 'Debes autorizar el uso de tus datos' }),
+  }),
   llevaPersonasExtras: z.boolean().optional(),
   cantidadPersonasExtras: z.number().optional(),
   nombresPersonasExtras: z.array(z.string()).optional(),
@@ -75,15 +76,14 @@ export default function EmpresaRegistrationForm() {
       telefono2: '',
       personasExtras: '',
       nivelVacante: '',
-      carrerasBuscadas: [],
+      carreraBuscada: [],
       requiereStand: false,
-      stand: '',
       participaBolsa: false,
       traeArticulos: false,
       articulo: '',
       logo: '',
       descripcion: '',
-      autorizacion: '',
+      autorizacion: "NO",
       llevaPersonasExtras: false,
       cantidadPersonasExtras: 0,
       nombresPersonasExtras: [],
@@ -98,7 +98,7 @@ export default function EmpresaRegistrationForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsSubmitting(true);
     try {
-      const carrerasTexto = values.carrerasBuscadas.join(',');
+      const carrerasTexto = values.carreraBuscada.join(',');
 
       const { error } = await supabase.from('RegistroEmpresas').insert([
         {
@@ -361,7 +361,7 @@ export default function EmpresaRegistrationForm() {
         {/* Carreras buscadas */}
         <FormField
           control={form.control}
-          name="carrerasBuscadas"
+          name="carreraBuscada"
           render={({ field }) => (
             <FormItem>
               <FormLabel>Carreras buscadas</FormLabel>
@@ -541,9 +541,6 @@ export default function EmpresaRegistrationForm() {
             </FormItem>
           )}
         />
-
-
-
         <Button
           type="submit"
           className="w-full bg-black text-white hover:bg-black/90"
